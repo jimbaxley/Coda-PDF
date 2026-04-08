@@ -45,66 +45,7 @@
       font-size: 12px;
     }
 
-    .action-bar .edit-badge {
-      background: #f0e8f8;
-      color: var(--purple);
-      font-size: 10px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
     .action-bar .spacer { flex: 1; }
-
-    .action-bar .hint {
-      font-size: 10px;
-      color: #aaa;
-    }
-
-    .action-bar .drop-zone {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border: 1px dashed #ccc;
-      border-radius: 6px;
-      font-size: 11px;
-      color: #888;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .action-bar .drop-zone:hover,
-    .action-bar .drop-zone.drag-over {
-      border-color: var(--purple);
-      color: var(--purple);
-    }
-
-    .action-bar .drop-zone input[type=file] {
-      display: none;
-    }
-
-    .action-bar .screenshot-name {
-      font-size: 10px;
-      color: var(--purple);
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .action-bar .btn-clear-img {
-      font-size: 10px;
-      color: #aaa;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-    }
-
-    .action-bar .btn-clear-img:hover { color: #c00; }
 
     .action-bar button.btn-pdf {
       background: var(--purple);
@@ -140,50 +81,12 @@
 
     .action-bar .btn-sign:hover { background: rgba(91,45,142,0.07); }
 
-    .action-bar .btn-reset {
-      background: none;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 11px;
-      font-family: 'Montserrat', sans-serif;
-      color: #888;
-      cursor: pointer;
-    }
-    .action-bar .btn-reset:hover { border-color: #c00; color: #c00; }
-
-    .saved-badge {
-      font-size: 10px;
-      color: #2d8e3e;
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-
     /* ===== PAGE WRAPPER ===== */
     .page-wrapper {
       margin: 60px auto 40px;
       max-width: 8.5in;
       background: #fff;
       box-shadow: 0 2px 16px rgba(0,0,0,0.15);
-    }
-
-    /* ===== CONTENTEDITABLE STYLING ===== */
-    [contenteditable] {
-      outline: none;
-      border-radius: 3px;
-      transition: background 0.15s, box-shadow 0.15s;
-      background: rgba(91, 45, 142, 0.06);
-      box-shadow: inset 0 0 0 1px rgba(91, 45, 142, 0.18);
-    }
-
-    [contenteditable]:hover {
-      background: rgba(91, 45, 142, 0.1);
-      box-shadow: inset 0 0 0 1px rgba(91, 45, 142, 0.3);
-    }
-
-    [contenteditable]:focus {
-      background: rgba(91, 45, 142, 0.12);
-      box-shadow: 0 0 0 2px rgba(91, 45, 142, 0.35);
     }
 
     /* ===== HEADER BANNER ===== */
@@ -229,8 +132,6 @@
 
     .metadata-left { flex: 1; }
     .metadata-left .prop-name { font-weight: 700; font-size: 10pt; }
-    .metadata-left .prop-number { font-size: 9pt; color: var(--text-muted); margin-bottom: 0.5em; }
-
     .metadata-left .meta-details { display: flex; gap: 2em; margin-top: 0.4em; }
     .metadata-left .meta-col { display: flex; flex-direction: column; }
     .metadata-left .meta-label { font-size: 7pt; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -266,15 +167,11 @@
     .opening-text h2 { font-size: 11pt; }
     .opening-text h3 { font-size: 10pt; }
     .opening-text strong { font-weight: 600; }
+    .opening-text img { max-width: 100%; height: auto; border-radius: 4px; margin: 0.5em 0; }
     .opening-text table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 9pt; }
     .opening-text table th { background: var(--gray-light); font-weight: 600; text-align: left; padding: 0.4em 0.6em; border: 1px solid var(--gray-border); }
     .opening-text table td { padding: 0.4em 0.6em; border: 1px solid var(--gray-border); }
     .opening-text table tr:nth-child(even) { background: #fafafa; }
-
-    /* ===== SCREENSHOT EMBED ===== */
-    .screenshot-embed { margin: 1em 0 1.5em; display: none; }
-    .screenshot-embed.has-image { display: block; }
-    .screenshot-embed img { width: 100%; border: 1px solid var(--gray-border); border-radius: 4px; }
 
     /* ===== LINE ITEMS TABLE ===== */
     .line-items { width: 100%; border-collapse: collapse; margin-bottom: 0.5em; }
@@ -288,19 +185,7 @@
     .proposal-total .label { font-weight: 600; }
     .proposal-total .amount { font-weight: 700; font-size: 14pt; margin-left: 0.5em; }
 
-    /* ===== TOTAL NOTES ===== */
-    .total-notes {
-      font-size: 9pt;
-      color: var(--text-muted);
-      margin-bottom: 1.5em;
-      min-height: 1.2em;
-    }
-
-    .total-notes:empty::before {
-      content: 'Add a note here...';
-      color: #ccc;
-      pointer-events: none;
-    }
+    .total-notes { font-size: 9pt; color: var(--text-muted); margin-bottom: 1.5em; }
 
     /* ===== PACKAGES ===== */
     .package-card { border: 1px solid var(--gray-border); border-radius: 4px; padding: 0.75em 1em; margin-bottom: 0.75em; }
@@ -334,25 +219,9 @@
 
     @media print {
       body { background: #fff; }
-
       .action-bar { display: none !important; }
-
-      .page-wrapper {
-        margin: 0;
-        max-width: none;
-        box-shadow: none;
-      }
-
-      [contenteditable] {
-        background: transparent !important;
-        box-shadow: none !important;
-        outline: none !important;
-      }
-
-      .header-banner {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
+      .page-wrapper { margin: 0; max-width: none; box-shadow: none; }
+      .header-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
@@ -360,20 +229,8 @@
 
   <!-- Action Bar (hidden in print) -->
   <div class="action-bar">
-    <span class="edit-badge">✎ Editing</span>
-    <span class="hint">Click any purple-highlighted field to edit</span>
+    <span style="font-size:11px; color:#aaa;">{{proposalNumber}} — {{proposalName}}</span>
     <div class="spacer"></div>
-    <span class="saved-badge" id="savedBadge">✓ Saved</span>
-    <button class="btn-reset" onclick="if(confirm('Reset all edits for this proposal?')){clearSaved();location.reload();}">Reset edits</button>
-
-    <!-- Screenshot upload -->
-    <label class="drop-zone" id="dropZone" title="Upload a screenshot (e.g. budget table)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <span id="dropLabel">Add screenshot</span>
-      <input type="file" id="screenshotInput" accept="image/*">
-    </label>
-    <span class="screenshot-name" id="screenshotName" style="display:none;"></span>
-    <button class="btn-clear-img" id="clearImgBtn" style="display:none;" onclick="clearScreenshot()" title="Remove screenshot">✕</button>
 
     <button class="btn-sign" onclick="copySigningLink()" title="Copy a link to send to your client for signing">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -389,20 +246,17 @@
   <!-- Page -->
   <div class="page-wrapper">
 
-    <!-- Header Banner -->
     {{#if cover}}
     <div class="header-banner" style="background-image: url('{{cover}}');"></div>
     {{else}}
     <div class="header-banner" style="background: linear-gradient(135deg, #3E1D63 0%, #5B2D8E 50%, #7B4FB0 100%); min-height: 120px;"></div>
     {{/if}}
 
-    <!-- Proposal Title Bar -->
     <div class="proposal-title-bar">
-      <h1><span contenteditable="true" data-field="documentTitle">{{documentTitle}}</span>: <strong>{{proposalName}}</strong></h1>
+      <h1>{{documentTitle}}: <strong>{{proposalName}}</strong></h1>
       <span class="proposal-date">{{proposalNumber}} &nbsp;|&nbsp; {{date}}</span>
     </div>
 
-    <!-- Metadata Row -->
     <div class="metadata-row">
       <div class="metadata-left">
         <div class="prop-name">{{clientCompany}}</div>
@@ -424,21 +278,11 @@
       </div>
     </div>
 
-    <!-- Content -->
     <div class="content">
 
-      <!-- About the Work -->
       <h2 class="section-heading">About the work</h2>
-      <div class="opening-text">
-        {{{openingText}}}
-      </div>
+      <div class="opening-text">{{{openingText}}}</div>
 
-      <!-- Screenshot embed (populated by JS) -->
-      <div class="screenshot-embed" id="screenshotEmbed">
-        <img id="screenshotImg" src="" alt="Budget table screenshot">
-      </div>
-
-      <!-- Line Items -->
       {{#if lineItems.length}}
       <h2 class="section-heading">What we will deliver</h2>
       <table class="line-items">
@@ -461,7 +305,7 @@
       </table>
 
       <div class="proposal-total">
-        <span class="label" contenteditable="true" data-field="totalLabel">{{totalLabel}}</span>
+        <span class="label">{{totalLabel}}</span>
         <span class="amount">{{total}}</span>
       </div>
 
@@ -470,7 +314,6 @@
       {{/if}}
       {{/if}}
 
-      <!-- Packages -->
       {{#if packages.length}}
       <h2 class="section-heading">Packages</h2>
       {{#each packages}}
@@ -481,25 +324,18 @@
       {{/each}}
       {{/if}}
 
-      <!-- What's Next -->
       <h2 class="section-heading">What's Next</h2>
-      <div class="text-section" contenteditable="true" data-field="whatsNext">
-        {{{whatsNext}}}
-      </div>
+      <div class="text-section">{{{whatsNext}}}</div>
 
-      <!-- Thank You -->
       <h2 class="section-heading">Thank you</h2>
-      <div class="text-section" contenteditable="true" data-field="thankYou">
-        {{{thankYou}}}
-      </div>
+      <div class="text-section">{{{thankYou}}}</div>
 
-      <!-- Signatures -->
       <div class="signatures">
         <h2 class="section-heading">Signatures</h2>
         <div class="sig-row">
           <div class="sig-block">
             <div class="sig-line"></div>
-            <div class="sig-name" contenteditable="true" data-field="signatory">{{branding.signatory}}</div>
+            <div class="sig-name">{{branding.signatory}}</div>
             <div class="sig-company">{{branding.companyName}}</div>
             <div class="sig-date-label">Date</div>
             <div class="sig-date-line"></div>
@@ -514,7 +350,6 @@
         </div>
       </div>
 
-      <!-- Terms Footer -->
       <div class="terms-footer">
         <h3>Terms and Conditions</h3>
         <p>Our relationship is governed by the Terms and Conditions at <a href="https://{{branding.termsUrl}}">{{branding.termsUrl}}</a>.</p>
@@ -527,114 +362,6 @@
   </div>
 
   <script>
-    // Screenshot handling
-    const screenshotInput = document.getElementById('screenshotInput');
-    const screenshotEmbed = document.getElementById('screenshotEmbed');
-    const screenshotImg = document.getElementById('screenshotImg');
-    const screenshotName = document.getElementById('screenshotName');
-    const clearImgBtn = document.getElementById('clearImgBtn');
-    const dropLabel = document.getElementById('dropLabel');
-    const dropZone = document.getElementById('dropZone');
-
-    // Storage key is based on the proposal query param so each proposal
-    // has its own saved state
-    const storageKey = 'proposal-edits:' + (new URLSearchParams(location.search).get('proposal') || location.href);
-
-    // --- Persistence ---
-
-    function saveEdits() {
-      const edits = {};
-      document.querySelectorAll('[data-field]').forEach(el => {
-        edits[el.dataset.field] = el.innerHTML;
-      });
-      edits.__screenshot = screenshotImg.src || '';
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(edits));
-      } catch(e) {
-        // localStorage full (large base64 image) — silently skip
-      }
-    }
-
-    function restoreEdits() {
-      let saved;
-      try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
-      if (!saved) return;
-
-      document.querySelectorAll('[data-field]').forEach(el => {
-        if (saved[el.dataset.field] !== undefined) {
-          el.innerHTML = saved[el.dataset.field];
-        }
-      });
-
-      if (saved.__screenshot) {
-        screenshotImg.src = saved.__screenshot;
-        screenshotEmbed.classList.add('has-image');
-        screenshotName.textContent = 'restored';
-        screenshotName.style.display = 'block';
-        clearImgBtn.style.display = 'inline';
-        dropLabel.textContent = 'Replace';
-      }
-
-      showSavedBadge();
-    }
-
-    function clearSaved() {
-      localStorage.removeItem(storageKey);
-    }
-
-    function showSavedBadge() {
-      const badge = document.getElementById('savedBadge');
-      badge.style.opacity = '1';
-      clearTimeout(badge._t);
-      badge._t = setTimeout(() => badge.style.opacity = '0', 2000);
-    }
-
-    // Auto-save on any edit
-    document.addEventListener('input', function(e) {
-      if (e.target.matches('[data-field]')) {
-        saveEdits();
-        showSavedBadge();
-      }
-    });
-
-    // Restore on load
-    window.addEventListener('DOMContentLoaded', restoreEdits);
-
-    // --- Screenshot ---
-
-    screenshotInput.addEventListener('change', function() {
-      if (this.files[0]) loadScreenshot(this.files[0]);
-    });
-
-    document.body.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      dropZone.classList.add('drag-over');
-    });
-    document.body.addEventListener('dragleave', function() {
-      dropZone.classList.remove('drag-over');
-    });
-    document.body.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) loadScreenshot(file);
-    });
-
-    function loadScreenshot(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        screenshotImg.src = e.target.result;
-        screenshotEmbed.classList.add('has-image');
-        screenshotName.textContent = file.name;
-        screenshotName.style.display = 'block';
-        clearImgBtn.style.display = 'inline';
-        dropLabel.textContent = 'Replace';
-        saveEdits();
-        showSavedBadge();
-      };
-      reader.readAsDataURL(file);
-    }
-
     function copySigningLink() {
       const proposal = new URLSearchParams(location.search).get('proposal') || '';
       const signingUrl = location.origin + '/?proposal=' + encodeURIComponent(proposal) + '&mode=sign';
@@ -643,19 +370,8 @@
         label.textContent = '✓ Link copied!';
         setTimeout(() => { label.textContent = 'Send for Signing'; }, 2500);
       }).catch(function() {
-        // Fallback: prompt with the URL
         window.prompt('Copy this link to send to your client:', signingUrl);
       });
-    }
-
-    function clearScreenshot() {
-      screenshotImg.src = '';
-      screenshotEmbed.classList.remove('has-image');
-      screenshotName.style.display = 'none';
-      clearImgBtn.style.display = 'none';
-      dropLabel.textContent = 'Add screenshot';
-      screenshotInput.value = '';
-      saveEdits();
     }
   </script>
 
