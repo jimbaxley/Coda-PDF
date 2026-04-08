@@ -171,16 +171,19 @@
     [contenteditable] {
       outline: none;
       border-radius: 3px;
-      transition: background 0.15s;
+      transition: background 0.15s, box-shadow 0.15s;
+      background: rgba(91, 45, 142, 0.06);
+      box-shadow: inset 0 0 0 1px rgba(91, 45, 142, 0.18);
     }
 
     [contenteditable]:hover {
-      background: rgba(91, 45, 142, 0.05);
+      background: rgba(91, 45, 142, 0.1);
+      box-shadow: inset 0 0 0 1px rgba(91, 45, 142, 0.3);
     }
 
     [contenteditable]:focus {
-      background: rgba(91, 45, 142, 0.08);
-      box-shadow: 0 0 0 2px rgba(91, 45, 142, 0.25);
+      background: rgba(91, 45, 142, 0.12);
+      box-shadow: 0 0 0 2px rgba(91, 45, 142, 0.35);
     }
 
     /* ===== HEADER BANNER ===== */
