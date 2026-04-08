@@ -123,6 +123,23 @@
 
     .action-bar button.btn-pdf:hover { background: var(--purple-dark); }
 
+    .action-bar .btn-sign {
+      background: none;
+      border: 1.5px solid var(--purple);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--purple);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-bar .btn-sign:hover { background: rgba(91,45,142,0.07); }
+
     .action-bar .btn-reset {
       background: none;
       border: 1px solid #ddd;
@@ -354,6 +371,11 @@
     </label>
     <span class="screenshot-name" id="screenshotName" style="display:none;"></span>
     <button class="btn-clear-img" id="clearImgBtn" style="display:none;" onclick="clearScreenshot()" title="Remove screenshot">✕</button>
+
+    <button class="btn-sign" onclick="copySigningLink()" title="Copy a link to send to your client for signing">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span id="signBtnLabel">Send for Signing</span>
+    </button>
 
     <button class="btn-pdf" onclick="window.print()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -608,6 +630,19 @@
         showSavedBadge();
       };
       reader.readAsDataURL(file);
+    }
+
+    function copySigningLink() {
+      const proposal = new URLSearchParams(location.search).get('proposal') || '';
+      const signingUrl = location.origin + '/?proposal=' + encodeURIComponent(proposal) + '&mode=sign';
+      navigator.clipboard.writeText(signingUrl).then(function() {
+        const label = document.getElementById('signBtnLabel');
+        label.textContent = '✓ Link copied!';
+        setTimeout(() => { label.textContent = 'Send for Signing'; }, 2500);
+      }).catch(function() {
+        // Fallback: prompt with the URL
+        window.prompt('Copy this link to send to your client:', signingUrl);
+      });
     }
 
     function clearScreenshot() {

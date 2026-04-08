@@ -20,7 +20,8 @@ module.exports = async function handler(req, res) {
 
   try {
     const templateData = await fetchProposalData(proposalNumber);
-    const html = renderHtml(templateData, 'editable-proposal.html');
+    const template = req.query.mode === 'sign' ? 'sign-proposal.html' : 'editable-proposal.html';
+    const html = renderHtml(templateData, template);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (err) {

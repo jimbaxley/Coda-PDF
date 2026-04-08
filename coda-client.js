@@ -46,6 +46,24 @@ class CodaClient {
     const rows = await this.getRows(tableId, query);
     return rows.map((row) => row.values);
   }
+
+  async updateRow(tableId, rowId, cells) {
+    // cells: { 'Column Name': value, ... }
+    const url = `${BASE_URL}/docs/${this.docId}/tables/${tableId}/rows/${rowId}?useColumnNames=true`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: this.headers,
+      body: JSON.stringify({
+        row: {
+          cells: Object.entries(cells).map(([column, value]) => ({ column, value })),
+        },
+      }),
+    });
+    if (!res.ok) {
+      throw new Error(`Coda API error ${res.status}: ${await res.text()}`);
+    }
+    return res.json();
+  }
 }
 
 module.exports = CodaClient;
