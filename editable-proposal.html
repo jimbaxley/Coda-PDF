@@ -302,12 +302,12 @@
     .sig-date-line { border-bottom: 1px solid #333; width: 50%; height: 1.5em; }
 
     /* ===== TERMS FOOTER ===== */
-    .terms-footer { page-break-inside: avoid; margin-top: 2em; background: var(--purple); color: #fff; padding: 1em 1.5em; border-radius: 4px; }
-    .terms-footer h3 { font-size: 11pt; font-weight: 700; margin-bottom: 0.25em; }
-    .terms-footer p { font-size: 8pt; font-weight: 300; opacity: 0.9; }
-    .terms-footer a { color: #fff; text-decoration: underline; }
-    .terms-footer .address-line { margin-top: 0.75em; font-size: 8pt; opacity: 0.8; }
-    .terms-footer .address-line a { color: #fff; }
+    .terms-footer { page-break-inside: avoid; margin-top: 2em; background: var(--gray-light); border: 1px solid var(--gray-border); padding: 1em 1.5em; border-radius: 4px; }
+    .terms-footer h3 { font-size: 11pt; font-weight: 700; margin-bottom: 0.25em; color: var(--purple); }
+    .terms-footer p { font-size: 8pt; color: var(--text-muted); }
+    .terms-footer a { color: var(--purple); text-decoration: underline; }
+    .terms-footer .address-line { margin-top: 0.75em; font-size: 8pt; color: var(--text-muted); }
+    .terms-footer .address-line a { color: var(--purple); }
 
     /* ===== PRINT ===== */
     @page { size: Letter; margin: 0.5in 0.75in; }
@@ -329,8 +329,7 @@
         outline: none !important;
       }
 
-      .header-banner,
-      .terms-footer {
+      .header-banner {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -374,15 +373,14 @@
 
     <!-- Proposal Title Bar -->
     <div class="proposal-title-bar">
-      <h1><span contenteditable="true" data-field="documentTitle">{{documentTitle}}</span> for <strong>{{clientCompany}}</strong></h1>
-      <span class="proposal-date">{{date}}</span>
+      <h1><span contenteditable="true" data-field="documentTitle">{{documentTitle}}</span>: <strong>{{proposalName}}</strong></h1>
+      <span class="proposal-date">{{proposalNumber}} &nbsp;|&nbsp; {{date}}</span>
     </div>
 
     <!-- Metadata Row -->
     <div class="metadata-row">
       <div class="metadata-left">
-        <div class="prop-name">{{proposalName}}</div>
-        <div class="prop-number">{{proposalNumber}}</div>
+        <div class="prop-name">{{clientCompany}}</div>
         <div class="meta-details">
           <div class="meta-col">
             <span class="meta-label">Contact</span>
@@ -494,10 +492,7 @@
       <!-- Terms Footer -->
       <div class="terms-footer">
         <h3>Terms and Conditions</h3>
-        <p contenteditable="true" data-field="termsLine">{{{termsLine}}}</p>
-        {{#if specialTerms}}
-        {{{specialTerms}}}
-        {{/if}}
+        <p>Our relationship is governed by the Terms and Conditions at <a href="https://{{branding.termsUrl}}">{{branding.termsUrl}}</a>.</p>
         <div class="address-line">
           {{branding.address}} | <a href="mailto:{{branding.email}}">{{branding.email}}</a> | {{branding.phone}}
         </div>
