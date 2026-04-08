@@ -14,7 +14,7 @@
   "dependencies": {
     "dotenv": "^17.4.1",
     "handlebars": "^4.7.9",
-    "marked": "^18.0.0",
+    "marked": "^4.3.0",
     "puppeteer": "^24.40.0"
   }
 }
