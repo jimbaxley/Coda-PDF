@@ -1,0 +1,20 @@
+{
+  "name": "coda-pdf",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "generate": "node generate-proposal.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "handlebars": "^4.7.9",
+    "marked": "^18.0.0",
+    "puppeteer": "^24.40.0"
+  }
+}

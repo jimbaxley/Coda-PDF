@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Proposal Editor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 340px;
+      min-width: 340px;
+      background: #fff;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 16px 20px 8px;
+      color: #5B2D8E;
+      border-bottom: 1px solid #eee;
+    }
+
+    .field-group {
+      padding: 12px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .field-group input,
+    .field-group textarea {
+      width: 100%;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-family: 'Montserrat', sans-serif;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus {
+      border-color: #5B2D8E;
+    }
+
+    .field-group textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .actions {
+      padding: 16px 20px;
+      border-top: 1px solid #ddd;
+      background: #fafafa;
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-preview {
+      background: #5B2D8E;
+      color: #fff;
+    }
+
+    .btn-preview:hover {
+      background: #4a2375;
+    }
+
+    .btn-pdf {
+      background: #333;
+      color: #fff;
+    }
+
+    .btn-pdf:hover {
+      background: #222;
+    }
+
+    .collapsible {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .collapsible::after {
+      content: '\25B6';
+      font-size: 9px;
+      color: #aaa;
+      transition: transform 0.2s;
+    }
+
+    .collapsible.open::after {
+      transform: rotate(90deg);
+    }
+
+    .collapsible-body {
+      display: none;
+    }
+
+    .collapsible-body.open {
+      display: block;
+    }
+
+    .margin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .margin-grid label {
+      margin-bottom: 0;
+    }
+
+    .margin-grid input {
+      width: 100%;
+    }
+
+    .status {
+      padding: 8px 20px;
+      font-size: 11px;
+      color: #666;
+      min-height: 30px;
+    }
+
+    .status.success { color: #2d8e3e; }
+    .status.error { color: #c0392b; }
+
+    /* --- Preview Pane --- */
+    .preview-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      padding: 20px;
+      background: #e8e8e8;
+    }
+
+    .preview-pane iframe {
+      width: 8.5in;
+      min-height: 11in;
+      border: none;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Document Settings</h2>
+
+    <div class="field-group">
+      <label>Document Title</label>
+      <input type="text" id="documentTitle" placeholder="Proposal">
+    </div>
+
+    <div class="field-group">
+      <label>Total Label</label>
+      <input type="text" id="totalLabel" placeholder="Proposal Total:">
+    </div>
+
+    <div class="field-group">
+      <label>Terms Line</label>
+      <textarea id="termsLine" placeholder="Our relationship is governed by..."></textarea>
+    </div>
+
+    <h2>Embedded Images</h2>
+    <div class="field-group">
+      <label>Screenshot (e.g. budget table)</label>
+      <input type="file" id="screenshotFile" accept="image/*" onchange="handleScreenshot(this)">
+      <div id="screenshotPreview" style="margin-top:6px;"></div>
+      <button onclick="clearScreenshot()" style="margin-top:4px;font-size:11px;cursor:pointer;background:none;border:1px solid #ddd;border-radius:3px;padding:2px 8px;color:#888;display:none;" id="clearScreenshotBtn">Remove</button>
+    </div>
+
+    <h2>What's Next</h2>
+    <div class="field-group">
+      <label>Content (HTML)</label>
+      <textarea id="whatsNext" rows="3"></textarea>
+    </div>
+
+    <h2>Thank You</h2>
+    <div class="field-group">
+      <label>Content (HTML)</label>
+      <textarea id="thankYou" rows="2"></textarea>
+    </div>
+
+    <h2>Signatures</h2>
+    <div class="field-group">
+      <label>Your Signatory</label>
+      <input type="text" id="brandingSignatory" placeholder="Laura Baxley">
+    </div>
+
+    <h2 class="collapsible" onclick="toggleCollapsible(this)">PDF Settings</h2>
+    <div class="collapsible-body" id="pdfSettings">
+      <div class="field-group">
+        <label>Page Size</label>
+        <select id="pageSize" style="width:100%;padding:6px 10px;font-size:13px;font-family:'Montserrat',sans-serif;border:1px solid #ddd;border-radius:4px;">
+          <option value="Letter" selected>Letter (8.5 x 11)</option>
+          <option value="A4">A4</option>
+          <option value="Legal">Legal (8.5 x 14)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Margins (inches)</label>
+        <div class="margin-grid">
+          <div>
+            <label>Top</label>
+            <input type="text" id="marginTop" value="0.5">
+          </div>
+          <div>
+            <label>Bottom</label>
+            <input type="text" id="marginBottom" value="0.5">
+          </div>
+          <div>
+            <label>Left</label>
+            <input type="text" id="marginLeft" value="0.75">
+          </div>
+          <div>
+            <label>Right</label>
+            <input type="text" id="marginRight" value="0.75">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="actions">
+      <button class="btn-preview" onclick="updatePreview()">Refresh Preview</button>
+      <button class="btn-pdf" onclick="generatePdf()">Download PDF</button>
+    </div>
+  </div>
+
+  <div class="preview-pane">
+    <iframe id="previewFrame"></iframe>
+  </div>
+
+  <script>
+    let currentData = {};
+    let screenshotDataUrl = '';
+
+    // Load initial data from server
+    async function init() {
+      const res = await fetch('/data');
+      currentData = await res.json();
+      populateFields(currentData);
+      updatePreview();
+    }
+
+    function handleScreenshot(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        screenshotDataUrl = e.target.result;
+        document.getElementById('screenshotPreview').innerHTML =
+          '<img src="' + screenshotDataUrl + '" style="max-width:100%;border:1px solid #ddd;border-radius:4px;">';
+        document.getElementById('clearScreenshotBtn').style.display = 'inline-block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearScreenshot() {
+      screenshotDataUrl = '';
+      document.getElementById('screenshotFile').value = '';
+      document.getElementById('screenshotPreview').innerHTML = '';
+      document.getElementById('clearScreenshotBtn').style.display = 'none';
+    }
+
+    function populateFields(data) {
+      document.getElementById('documentTitle').value = data.documentTitle || 'Proposal';
+      document.getElementById('totalLabel').value = data.totalLabel || 'Proposal Total:';
+      document.getElementById('termsLine').value = data.termsLine || '';
+      document.getElementById('whatsNext').value = data.whatsNext || '';
+      document.getElementById('thankYou').value = data.thankYou || '';
+      document.getElementById('brandingSignatory').value =
+        (data.branding && data.branding.signatory) || 'Laura Baxley';
+    }
+
+    function getOverrides() {
+      return {
+        documentTitle: document.getElementById('documentTitle').value,
+        totalLabel: document.getElementById('totalLabel').value,
+        termsLine: document.getElementById('termsLine').value,
+        whatsNext: document.getElementById('whatsNext').value,
+        thankYou: document.getElementById('thankYou').value,
+        screenshotUrl: screenshotDataUrl,
+        branding: {
+          ...currentData.branding,
+          signatory: document.getElementById('brandingSignatory').value,
+        },
+      };
+    }
+
+    async function updatePreview() {
+      setStatus('Rendering preview...', '');
+      try {
+        const overrides = getOverrides();
+        const res = await fetch('/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(overrides),
+        });
+        const html = await res.text();
+        const frame = document.getElementById('previewFrame');
+        frame.srcdoc = html;
+        setStatus('Preview updated.', 'success');
+      } catch (err) {
+        setStatus('Error: ' + err.message, 'error');
+      }
+    }
+
+    async function generatePdf() {
+      setStatus('Generating PDF...', '');
+      try {
+        const overrides = getOverrides();
+        overrides.pdfSettings = getPdfSettings();
+        const res = await fetch('/pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(overrides),
+        });
+        const result = await res.json();
+        setStatus('PDF saved to: ' + result.path, 'success');
+      } catch (err) {
+        setStatus('Error: ' + err.message, 'error');
+      }
+    }
+
+    function toggleCollapsible(el) {
+      el.classList.toggle('open');
+      const body = el.nextElementSibling;
+      body.classList.toggle('open');
+    }
+
+    function getPdfSettings() {
+      return {
+        pageSize: document.getElementById('pageSize').value,
+        margins: {
+          top: document.getElementById('marginTop').value + 'in',
+          bottom: document.getElementById('marginBottom').value + 'in',
+          left: document.getElementById('marginLeft').value + 'in',
+          right: document.getElementById('marginRight').value + 'in',
+        },
+      };
+    }
+
+    function setStatus(msg, cls) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'status ' + (cls || '');
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
