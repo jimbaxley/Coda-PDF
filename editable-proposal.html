@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{documentTitle}} — {{proposalName}}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap');
 
     :root {
       --purple: #5B2D8E;
@@ -204,11 +204,20 @@
     .signatures { page-break-inside: avoid; margin-top: 1.5em; padding-top: 0.5em; }
     .sig-row { display: flex; justify-content: space-between; gap: 3em; margin-top: 1em; }
     .sig-block { flex: 1; }
-    .sig-line { border-bottom: 1px solid #333; height: 2em; margin-bottom: 0.25em; }
+    .sig-line { border-bottom: 1px solid #333; height: 2em; margin-bottom: 0.25em; display: flex; align-items: flex-end; }
+    .sig-handwriting { font-family: 'Dancing Script', cursive; font-size: 20pt; color: #1a3a8a; line-height: 1; padding-bottom: 2px; }
     .sig-name { font-weight: 600; font-size: 10pt; }
     .sig-company { font-size: 9pt; color: var(--text-muted); }
     .sig-date-label { font-size: 8pt; color: var(--text-muted); margin-top: 1em; }
-    .sig-date-line { border-bottom: 1px solid #333; width: 50%; height: 1.5em; }
+    .sig-date-line { border-bottom: 1px solid #333; width: 50%; height: 1.5em; display: flex; align-items: flex-end; padding-bottom: 2px; }
+    .sig-date-text { font-size: 9pt; color: var(--text-muted); }
+
+    /* ===== SIGNED CONFIRMATION ===== */
+    .signed-confirmation { text-align: center; padding: 1.5em; margin-top: 2em; border: 2px solid #2d8e3e; border-radius: 8px; background: #f4faf5; }
+    .signed-confirmation .checkmark { font-size: 36pt; color: #2d8e3e; }
+    .signed-confirmation h2 { font-size: 14pt; font-weight: 700; color: #2d8e3e; margin: 0.25em 0; }
+    .signed-confirmation p { font-size: 9pt; color: var(--text-muted); margin-bottom: 1em; }
+    .signed-confirmation button { padding: 10px 28px; background: var(--purple); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; }
 
     /* ===== TERMS FOOTER ===== */
     .terms-footer { page-break-inside: avoid; margin-top: 2em; background: var(--gray-light); border: 1px solid var(--gray-border); padding: 1em 1.5em; border-radius: 4px; }
@@ -234,6 +243,9 @@
   <!-- Action Bar (hidden in print) -->
   <div class="action-bar">
     <span style="font-size:11px; color:#aaa;">{{proposalNumber}} — {{proposalName}}</span>
+    {{#if signedBy}}
+    <span style="font-size:11px; font-weight:600; color:#2d8e3e;">✓ Signed by {{signedBy}}{{#if signedDate}} &nbsp;·&nbsp; {{signedDate}}{{/if}}</span>
+    {{/if}}
     <div class="spacer"></div>
 
     <button class="btn-sign" onclick="copySigningLink()" title="Copy a link to send to your client for signing">
@@ -341,18 +353,26 @@
         <h2 class="section-heading">Signatures</h2>
         <div class="sig-row">
           <div class="sig-block">
-            <div class="sig-line"></div>
+            <div class="sig-line">
+              <span class="sig-handwriting">{{branding.signatory}}</span>
+            </div>
             <div class="sig-name">{{branding.signatory}}</div>
             <div class="sig-company">{{branding.companyName}}</div>
             <div class="sig-date-label">Date</div>
-            <div class="sig-date-line"></div>
+            <div class="sig-date-line">
+              <span class="sig-date-text">{{signedDate}}</span>
+            </div>
           </div>
           <div class="sig-block">
-            <div class="sig-line"></div>
+            <div class="sig-line">
+              {{#if signedBy}}<span class="sig-handwriting">{{signedBy}}</span>{{/if}}
+            </div>
             <div class="sig-name">{{clientContact}}</div>
             <div class="sig-company">{{clientCompany}}</div>
             <div class="sig-date-label">Date</div>
-            <div class="sig-date-line"></div>
+            <div class="sig-date-line">
+              <span class="sig-date-text">{{signedDate}}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -364,6 +384,15 @@
           {{branding.address}} | <a href="mailto:{{branding.email}}">{{branding.email}}</a> | {{branding.phone}}
         </div>
       </div>
+
+      {{#if signedBy}}
+      <div class="signed-confirmation">
+        <div class="checkmark">✓</div>
+        <h2>Already Signed</h2>
+        <p>This proposal was signed by <strong>{{signedBy}}</strong>{{#if signedDate}} on {{signedDate}}{{/if}}.</p>
+        <button onclick="window.print()">Download Signed Copy</button>
+      </div>
+      {{/if}}
 
     </div>
   </div>
