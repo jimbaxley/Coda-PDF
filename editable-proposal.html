@@ -281,7 +281,10 @@
     <div class="content">
 
       <h2 class="section-heading">About the work</h2>
-      <div class="opening-text">{{{openingText}}}</div>
+      <div class="opening-text">
+        {{{openingText}}}
+        {{#if imageBelow}}<img src="{{imageBelow}}" alt="" style="max-width:100%;height:auto;margin-top:0.5em;">{{/if}}
+      </div>
 
       {{#if lineItems.length}}
       <h2 class="section-heading">What we will deliver</h2>

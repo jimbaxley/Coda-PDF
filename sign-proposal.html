@@ -104,10 +104,6 @@
     .opening-text table th { background: var(--gray-light); font-weight: 600; text-align: left; padding: 0.4em 0.6em; border: 1px solid var(--gray-border); }
     .opening-text table td { padding: 0.4em 0.6em; border: 1px solid var(--gray-border); }
 
-    .screenshot-embed { margin: 1em 0 1.5em; display: none; }
-    .screenshot-embed.has-image { display: block; }
-    .screenshot-embed img { width: 100%; border: 1px solid var(--gray-border); border-radius: 4px; }
-
     .line-items { width: 100%; border-collapse: collapse; margin-bottom: 0.5em; }
     .line-items thead th { background: var(--gray-light); padding: 0.5em 0.75em; text-align: left; font-size: 9pt; font-weight: 600; border-bottom: 2px solid var(--gray-border); }
     .line-items thead th.cost-col { text-align: right; }
@@ -294,7 +290,7 @@
     {{/if}}
 
     <div class="proposal-title-bar">
-      <h1><span data-field="documentTitle">{{documentTitle}}</span>: <strong>{{proposalName}}</strong></h1>
+      <h1>{{documentTitle}}: <strong>{{proposalName}}</strong></h1>
       <span class="proposal-date">{{proposalNumber}} &nbsp;|&nbsp; {{date}}</span>
     </div>
 
@@ -322,11 +318,9 @@
     <div class="content">
 
       <h2 class="section-heading">About the work</h2>
-      <div class="opening-text">{{{openingText}}}</div>
-
-      <!-- Screenshot embed (populated from editor localStorage) -->
-      <div class="screenshot-embed" id="screenshotEmbed">
-        <img id="screenshotImg" src="" alt="Budget table screenshot">
+      <div class="opening-text">
+        {{{openingText}}}
+        {{#if imageBelow}}<img src="{{imageBelow}}" alt="" style="max-width:100%;height:auto;margin-top:0.5em;">{{/if}}
       </div>
 
       {{#if lineItems.length}}
@@ -350,7 +344,7 @@
         </tbody>
       </table>
       <div class="proposal-total">
-        <span class="label" data-field="totalLabel">{{totalLabel}}</span>
+        <span class="label">{{totalLabel}}</span>
         <span class="amount">{{total}}</span>
       </div>
       {{#if specialTerms}}
@@ -369,10 +363,10 @@
       {{/if}}
 
       <h2 class="section-heading">What's Next</h2>
-      <div class="text-section" data-field="whatsNext">{{{whatsNext}}}</div>
+      <div class="text-section">{{{whatsNext}}}</div>
 
       <h2 class="section-heading">Thank you</h2>
-      <div class="text-section" data-field="thankYou">{{{thankYou}}}</div>
+      <div class="text-section">{{{thankYou}}}</div>
 
       <!-- Signatures -->
       <div class="signatures">
@@ -382,7 +376,7 @@
             <div class="sig-line">
               <span class="sig-handwriting" id="lauraSig">{{branding.signatory}}</span>
             </div>
-            <div class="sig-name" data-field="signatory">{{branding.signatory}}</div>
+            <div class="sig-name">{{branding.signatory}}</div>
             <div class="sig-company">{{branding.companyName}}</div>
             <div class="sig-date-label">Date</div>
             <div class="sig-date-line">
