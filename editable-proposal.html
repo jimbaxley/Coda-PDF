@@ -421,7 +421,9 @@
         <span class="amount">{{total}}</span>
       </div>
 
-      <div class="total-notes" contenteditable="true" data-field="totalNotes">{{totalNotes}}</div>
+      {{#if specialTerms}}
+      <div class="total-notes">{{{specialTerms}}}</div>
+      {{/if}}
       {{/if}}
 
       <!-- Packages -->
