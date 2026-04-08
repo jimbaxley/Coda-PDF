@@ -1,6 +1,6 @@
 # Coda PDF — Proposal Generator
 
-Fetches proposal data from Coda and renders it as a styled HTML page. From there you can edit inline and print to PDF, or send a signing link to your client.
+Fetches proposal data from Coda and renders it as a styled HTML page. From there you can review, print to PDF, or send a signing link to your client.
 
 ---
 
@@ -8,9 +8,9 @@ Fetches proposal data from Coda and renders it as a styled HTML page. From there
 
 ```
 Coda button → https://yourapp.vercel.app/?proposal=P-XXXXXX-XX
-                → Vercel fetches Coda data → renders editable proposal page
-                → Edit inline → Print / Save as PDF
-                → "Send for Signing" → client signs → Coda row updated
+                → Vercel fetches Coda data → renders proposal page
+                → Print / Save as PDF
+                → "Copy Link to Sign" → client signs → Coda row updated
 ```
 
 ---
@@ -57,18 +57,18 @@ OpenWindow("https://YOUR-APP.vercel.app/?proposal=" & thisRow.[Proposal Number])
 
 ## Usage
 
-### Editing and downloading a proposal
+### Viewing and downloading a proposal
 
 1. Click the Coda button on any proposal row
-2. The proposal opens in your browser as an editable page
-3. Click any **purple-highlighted field** to edit it inline (edits are saved automatically in your browser per proposal)
-4. Drag and drop a screenshot into the **Add screenshot** zone to embed a budget table image
-5. Click **Print / Save as PDF** → Chrome print dialog → **Save as PDF**
+2. The proposal opens in your browser, rendered from Coda data
+3. Click **Print / Save as PDF** → Chrome print dialog → **Save as PDF**
+
+> To include a budget table or other image, add it to the `ImageBelow` column in your DB Proposals table — it will render below the opening text.
 
 ### Sending for e-signature
 
 1. Open the proposal in the editor
-2. Click **Send for Signing** in the toolbar — the signing link is copied to your clipboard
+2. Click **Copy Link for Signing** in the toolbar — the signing link is copied to your clipboard
 3. Paste the link into an email and send it to your client
 4. The client opens the link, reads the proposal, types their name, and clicks **I Agree & Sign**
 5. Their name appears in the signature block in handwriting font
@@ -104,7 +104,7 @@ npx vercel dev
 |---|---|
 | `api/index.js` | Vercel serverless handler — fetches data, renders HTML |
 | `api/signed.js` | POST webhook — receives signing event, updates Coda row |
-| `editable-proposal.html` | Inline-editable proposal page with action bar |
+| `editable-proposal.html` | Proposal preview page with print + signing toolbar |
 | `sign-proposal.html` | Read-only signing page for clients |
 | `lib/proposal.js` | Shared module — Coda data fetch + Handlebars render |
 | `coda-client.js` | Coda REST API client |

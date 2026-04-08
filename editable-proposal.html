@@ -238,7 +238,7 @@
 
     <button class="btn-sign" onclick="copySigningLink()" title="Copy a link to send to your client for signing">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-      <span id="signBtnLabel">Send for Signing</span>
+      <span id="signBtnLabel">Copy Link to Sign</span>
     </button>
 
     <button class="btn-pdf" onclick="window.print()">
@@ -375,7 +375,7 @@
       navigator.clipboard.writeText(signingUrl).then(function() {
         const label = document.getElementById('signBtnLabel');
         label.textContent = '✓ Link copied!';
-        setTimeout(() => { label.textContent = 'Send for Signing'; }, 2500);
+        setTimeout(() => { label.textContent = 'Copy Link to Sign'; }, 2500);
       }).catch(function() {
         window.prompt('Copy this link to send to your client:', signingUrl);
       });
