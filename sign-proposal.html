@@ -108,6 +108,10 @@
     .line-items thead th { background: var(--gray-light); padding: 0.5em 0.75em; text-align: left; font-size: 9pt; font-weight: 600; border-bottom: 2px solid var(--gray-border); }
     .line-items thead th.cost-col { text-align: right; }
     .line-items tbody td { padding: 0.5em 0.75em; border-bottom: 1px solid var(--gray-border); vertical-align: top; }
+    .line-items tbody td p { margin: 0 0 0.3em; }
+    .line-items tbody td p:last-child { margin-bottom: 0; }
+    .line-items tbody td ul, .line-items tbody td ol { margin: 0.2em 0 0.3em 1.2em; }
+    .line-items tbody td strong { font-weight: 600; }
     .line-items tbody td.cost-col { text-align: right; }
 
     .proposal-total { text-align: right; font-size: 12pt; margin: 0.75em 0 0.5em; padding-top: 0.5em; border-top: 2px solid var(--text-dark); }
@@ -337,7 +341,7 @@
           {{#each lineItems}}
           <tr>
             <td>{{service}}</td>
-            <td>{{details}}</td>
+            <td>{{{details}}}</td>
             <td class="cost-col">{{estCost}}</td>
           </tr>
           {{/each}}
