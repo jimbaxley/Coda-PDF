@@ -389,13 +389,13 @@
           </div>
           <div class="sig-block">
             <div class="sig-line">
-              <span class="sig-handwriting" id="clientSig"></span>
+              <span class="sig-handwriting" id="clientSig">{{signedBy}}</span>
             </div>
             <div class="sig-name">{{clientContact}}</div>
             <div class="sig-company">{{clientCompany}}</div>
             <div class="sig-date-label">Date</div>
             <div class="sig-date-line">
-              <span class="sig-date-text" id="clientDate"></span>
+              <span class="sig-date-text" id="clientDate">{{signedDate}}</span>
             </div>
           </div>
         </div>
@@ -412,6 +412,14 @@
 
       <!-- Sign Panel -->
       <div class="sign-panel-wrapper">
+        {{#if signedBy}}
+        <div class="signed-confirmation" id="signedConfirmation" style="display:block;">
+          <div class="checkmark">✓</div>
+          <h2>Already Signed</h2>
+          <p>This proposal was signed by <strong>{{signedBy}}</strong>{{#if signedDate}} on {{signedDate}}{{/if}}.</p>
+          <button onclick="window.print()">Download Signed Copy</button>
+        </div>
+        {{else}}
         <div class="sign-panel" id="signPanel">
           <h2>Sign this Proposal</h2>
           <p>By typing your name and clicking "I Agree &amp; Sign", you agree to the terms of this proposal.</p>
@@ -431,6 +439,7 @@
           <p>Thank you for signing. Click below to download your copy.</p>
           <button onclick="window.print()">Download Signed Copy</button>
         </div>
+        {{/if}}
       </div>
 
     </div>
@@ -441,8 +450,13 @@
     const clientContact = '{{clientContact}}';
     const signedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-    // Pre-fill Laura's date
-    document.getElementById('lauraDate').textContent = signedAt;
+    const alreadySigned = '{{signedBy}}' !== '';
+    const lauraDateEl = document.getElementById('lauraDate');
+    if (alreadySigned) {
+      lauraDateEl.textContent = '{{signedDate}}';
+    } else {
+      lauraDateEl.textContent = signedAt;
+    }
 
     function updateSignPreview(name) {
       document.getElementById('clientSig').textContent = name;
@@ -460,6 +474,7 @@
       // Fill signature block
       document.getElementById('clientSig').textContent = name;
       document.getElementById('clientDate').textContent = signedAt;
+      document.getElementById('lauraDate').textContent = signedAt;
 
       // Fire webhook to update Coda
       try {
