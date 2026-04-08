@@ -123,6 +123,25 @@
 
     .action-bar button.btn-pdf:hover { background: var(--purple-dark); }
 
+    .action-bar .btn-reset {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-family: 'Montserrat', sans-serif;
+      color: #888;
+      cursor: pointer;
+    }
+    .action-bar .btn-reset:hover { border-color: #c00; color: #c00; }
+
+    .saved-badge {
+      font-size: 10px;
+      color: #2d8e3e;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
     /* ===== PAGE WRAPPER ===== */
     .page-wrapper {
       margin: 60px auto 40px;
@@ -325,6 +344,8 @@
     <span class="edit-badge">✎ Editing</span>
     <span class="hint">Click any purple-highlighted field to edit</span>
     <div class="spacer"></div>
+    <span class="saved-badge" id="savedBadge">✓ Saved</span>
+    <button class="btn-reset" onclick="if(confirm('Reset all edits for this proposal?')){clearSaved();location.reload();}">Reset edits</button>
 
     <!-- Screenshot upload -->
     <label class="drop-zone" id="dropZone" title="Upload a screenshot (e.g. budget table)">
@@ -495,11 +516,76 @@
     const dropLabel = document.getElementById('dropLabel');
     const dropZone = document.getElementById('dropZone');
 
+    // Storage key is based on the proposal query param so each proposal
+    // has its own saved state
+    const storageKey = 'proposal-edits:' + (new URLSearchParams(location.search).get('proposal') || location.href);
+
+    // --- Persistence ---
+
+    function saveEdits() {
+      const edits = {};
+      document.querySelectorAll('[data-field]').forEach(el => {
+        edits[el.dataset.field] = el.innerHTML;
+      });
+      edits.__screenshot = screenshotImg.src || '';
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(edits));
+      } catch(e) {
+        // localStorage full (large base64 image) — silently skip
+      }
+    }
+
+    function restoreEdits() {
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
+      if (!saved) return;
+
+      document.querySelectorAll('[data-field]').forEach(el => {
+        if (saved[el.dataset.field] !== undefined) {
+          el.innerHTML = saved[el.dataset.field];
+        }
+      });
+
+      if (saved.__screenshot) {
+        screenshotImg.src = saved.__screenshot;
+        screenshotEmbed.classList.add('has-image');
+        screenshotName.textContent = 'restored';
+        screenshotName.style.display = 'block';
+        clearImgBtn.style.display = 'inline';
+        dropLabel.textContent = 'Replace';
+      }
+
+      showSavedBadge();
+    }
+
+    function clearSaved() {
+      localStorage.removeItem(storageKey);
+    }
+
+    function showSavedBadge() {
+      const badge = document.getElementById('savedBadge');
+      badge.style.opacity = '1';
+      clearTimeout(badge._t);
+      badge._t = setTimeout(() => badge.style.opacity = '0', 2000);
+    }
+
+    // Auto-save on any edit
+    document.addEventListener('input', function(e) {
+      if (e.target.matches('[data-field]')) {
+        saveEdits();
+        showSavedBadge();
+      }
+    });
+
+    // Restore on load
+    window.addEventListener('DOMContentLoaded', restoreEdits);
+
+    // --- Screenshot ---
+
     screenshotInput.addEventListener('change', function() {
       if (this.files[0]) loadScreenshot(this.files[0]);
     });
 
-    // Drag-and-drop onto the page body
     document.body.addEventListener('dragover', function(e) {
       e.preventDefault();
       dropZone.classList.add('drag-over');
@@ -523,6 +609,8 @@
         screenshotName.style.display = 'block';
         clearImgBtn.style.display = 'inline';
         dropLabel.textContent = 'Replace';
+        saveEdits();
+        showSavedBadge();
       };
       reader.readAsDataURL(file);
     }
@@ -534,6 +622,7 @@
       clearImgBtn.style.display = 'none';
       dropLabel.textContent = 'Add screenshot';
       screenshotInput.value = '';
+      saveEdits();
     }
   </script>
 
