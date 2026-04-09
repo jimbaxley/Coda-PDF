@@ -8,6 +8,9 @@
       "maxDuration": 60,
       "memory": 1024,
       "includeFiles": "**/*.html"
+    },
+    "api/download.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [

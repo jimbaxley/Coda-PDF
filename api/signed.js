@@ -37,7 +37,6 @@ module.exports = async function handler(req, res) {
       'Signed Date': signedAt,
     });
 
-    console.log(`Proposal ${proposalNumber} signed by ${clientName} at ${signedAt}`);
     res.status(200).json({ ok: true });
   } catch (err) {
     console.error('Failed to update Coda:', err.message);

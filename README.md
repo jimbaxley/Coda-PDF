@@ -1,99 +1,102 @@
 # Coda PDF — Proposal Generator
 
-Fetches proposal data from Coda and renders it as a styled HTML page. From there you can review, print to PDF, or send a signing link to your client.
+Fetches proposal data from a Coda doc and renders it as a styled, signable HTML proposal. Clients sign online; a PDF is generated server-side, stored privately, and emailed automatically.
 
 ---
 
 ## How It Works
 
 ```
-Coda button → https://yourapp.vercel.app/?proposal=P-XXXXXX-XX
-                → Vercel fetches Coda data → renders proposal page
-                → Print / Save as PDF
-                → "Copy Link to Sign" → client signs → Coda row updated
+Coda button → sign.baxleyconsulting.com/?proposal=P-XXXXXX-XX
+  → Vercel fetches Coda data → renders editable proposal page
+
+  "Copy Signing Link" → client opens ?mode=sign URL
+  → Client types name → clicks "I Agree & Sign"
+  → Simultaneously:
+      • Coda row updated (Signed By, Signed Date)
+      • Puppeteer generates signed PDF
+      • PDF uploaded to private Vercel Blob
+      • HMAC-signed download link generated
+      • Loops.so email sent to client + Jim
+      • Coda row updated (PDF Link, PDF Download URL)
+  → Client gets "Download Signed Copy" immediately from browser blob
+  → Email link hits /api/download → validates token → proxies private PDF
 ```
 
 ---
 
-## Setup
-
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure environment
-
-Copy `.env.example` to `.env` and fill in your values:
-
-```bash
-cp .env.example .env
-```
+## Environment Variables
 
 | Variable | Description |
 |---|---|
-| `CODA_API_TOKEN` | Your Coda API token (Settings → API) |
-| `CODA_DOC_ID` | The doc ID from your Coda URL (e.g. `C-uztK2tfM`) |
-| `BAXLEY_LOGO_URL` | Optional — URL to the white logo image for the header |
-
-### 3. Deploy to Vercel
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → **New Project** → import the repo
-3. When asked for a framework preset, select **Other**
-4. Add environment variables in **Settings → Environment Variables**: `CODA_API_TOKEN`, `CODA_DOC_ID`
-5. Deploy — copy the URL
-
-### 4. Add a button in Coda
-
-In your Proposals table, add a button column with this formula:
-
-```
-OpenWindow("https://YOUR-APP.vercel.app/?proposal=" & thisRow.[Proposal Number])
-```
+| `CODA_API_TOKEN` | Coda API token (Settings → API) |
+| `CODA_DOC_ID` | Doc ID from your Coda URL (e.g. `C-uztK2tfM`) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token (Dashboard → Storage → Blob) |
+| `LOOPS_API_KEY` | Loops.so API key |
+| `PDF_HMAC_SECRET` | Random 32-byte hex string — signs download URLs |
+| `APP_BASE_URL` | Base URL for download links. Defaults to `https://sign.baxleyconsulting.com`. Set to `http://localhost:3000` for local testing. |
+| `BAXLEY_LOGO_URL` | Optional — URL to white logo image for the proposal header |
 
 ---
 
-## Usage
+## Coda Table Setup
 
-### Viewing and downloading a proposal
+### DB Proposals columns required
 
-1. Click the Coda button on any proposal row
-2. The proposal opens in your browser, rendered from Coda data
-3. Click **Print / Save as PDF** → Chrome print dialog → **Save as PDF**
+| Column | Type | Purpose |
+|---|---|---|
+| `Proposal Number` | Text | Primary key used in all lookups |
+| `Proposal Name` | Text | Shown in page title and PDF filename |
+| `Proposal Date` | Date | Shown on proposal header |
+| `Client` | Text / Lookup | Client company name |
+| `Contact` | Text / Lookup | Client contact name |
+| `Email address` | Text | Client email — receives signed PDF notification |
+| `Logo` | Image | Client logo |
+| `Cover` | Image | Cover/header image |
+| `Opening Text` | Long text (markdown) | Proposal body |
+| `ImageBelow` | Image | Optional image below opening text |
+| `Special Terms` | Long text (markdown) | Optional additional terms |
+| `What's Next` | Long text (markdown) | Optional next steps section |
+| `Thank You` | Long text (markdown) | Optional closing note |
+| `Our Signer` | Text | Baxley Consulting signatory name (defaults to "Laura Baxley") |
+| `Our Signed Date` | Date/Text | Date shown under our signature |
+| `Signed By` | Text | Written by webhook when client signs |
+| `Signed Date` | Date/Text | Written by webhook when client signs |
+| `PDF Link` | Text | Private Vercel Blob URL (written after signing) |
+| `PDF Download URL` | Text | HMAC-signed public download link (written after signing) |
 
-> To include a budget table or other image, add it to the `ImageBelow` column in your DB Proposals table — it will render below the opening text.
+### DB Line Items columns required
 
-### Sending for e-signature
+`Proposal Number`, `Service`, `Details`, `Est. Cost`
 
-1. Open the proposal in the editor
-2. Click **Copy Link for Signing** in the toolbar — the signing link is copied to your clipboard
-3. Paste the link into an email and send it to your client
-4. The client opens the link, reads the proposal, types their name, and clicks **I Agree & Sign**
-5. Their name appears in the signature block in handwriting font
-6. They click **Download Signed Copy** to save a PDF
-7. The Coda proposal row is automatically updated with `Signed By` and `Signed Date`
+### DB Packages columns required
 
-> **Coda setup:** Add two columns to your DB Proposals table — `Signed By` (text) and `Signed Date` (date/text) — so the webhook can write to them. You can then trigger Coda automations off those fields.
+`Proposal Number`, `Package`, `Package Rate`
 
 ---
 
-## Local PDF Generation (CLI)
-
-To generate a PDF locally using Puppeteer (useful for batch exports):
+## Local Development
 
 ```bash
-node generate-proposal.js "P-XXXXXX-XX"
-```
-
-Output is saved to `output/`.
-
-To test the web interface locally:
-
-```bash
+npm install
+cp .env .env.local   # or set APP_BASE_URL=http://localhost:3000 in .env
 npx vercel dev
-# then open http://localhost:3000/?proposal=P-XXXXXX-XX
+# open http://localhost:3000/?proposal=P-XXXXXX-XX
+```
+
+---
+
+## Deployment
+
+1. Push to GitHub
+2. Import to [vercel.com](https://vercel.com) → framework preset: **Other**
+3. Add all environment variables in **Settings → Environment Variables**
+4. Enable **Vercel Blob** storage (Dashboard → Storage → Create Blob Store)
+5. Deploy
+
+In Coda, add a button column to your Proposals table:
+```
+OpenWindow("https://sign.baxleyconsulting.com/?proposal=" & thisRow.[Proposal Number])
 ```
 
 ---
@@ -102,11 +105,24 @@ npx vercel dev
 
 | File | Purpose |
 |---|---|
-| `api/index.js` | Vercel serverless handler — fetches data, renders HTML |
-| `api/signed.js` | POST webhook — receives signing event, updates Coda row |
-| `editable-proposal.html` | Proposal preview page with print + signing toolbar |
-| `sign-proposal.html` | Read-only signing page for clients |
-| `lib/proposal.js` | Shared module — Coda data fetch + Handlebars render |
+| `api/index.js` | Main handler — fetches Coda data, renders proposal HTML |
+| `api/signed.js` | POST — receives signing event, writes Signed By + Signed Date to Coda |
+| `api/pdf.js` | GET/POST — generates signed PDF via Puppeteer, uploads to Blob, sends emails |
+| `api/download.js` | GET — validates HMAC token, proxies private blob as file download |
+| `lib/proposal.js` | Coda data fetch, Handlebars render, formatting helpers |
+| `lib/token.js` | HMAC token generation and validation for download URLs |
 | `coda-client.js` | Coda REST API client |
-| `generate-proposal.js` | CLI wrapper for local Puppeteer PDF export |
-| `vercel.json` | Vercel function config |
+| `sign-proposal.html` | Client-facing signing page |
+| `editable-proposal.html` | Internal proposal preview with toolbar |
+| `template.html` | Clean template used by CLI PDF generator |
+| `generate-proposal.js` | CLI tool — generates PDF locally via Puppeteer |
+| `vercel.json` | Vercel function config (timeouts, memory, file includes) |
+
+---
+
+## CLI PDF Generation
+
+```bash
+node generate-proposal.js "P-XXXXXX-XX"
+# Output saved to output/
+```
