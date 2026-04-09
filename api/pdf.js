@@ -2,8 +2,12 @@ require('dotenv').config();
 
 const { fetchProposalData, renderHtml } = require('../lib/proposal');
 
+// VERCEL_ENV is 'production' or 'preview' in real deployments, 'development' in vercel dev
+const isServerless = (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'development')
+  || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
 async function launchBrowser() {
-  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  if (isServerless) {
     const chromium = require('@sparticuz/chromium');
     const puppeteer = require('puppeteer-core');
     return puppeteer.launch({
@@ -29,11 +33,18 @@ module.exports = async function handler(req, res) {
 
     const browser = await launchBrowser();
     const page = await browser.newPage();
+    // 816px = 8.5in at 96dpi — matches Letter width so page-wrapper fills edge to edge
+    await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 1 });
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // Hide interactive UI — only the proposal content goes in the PDF
     await page.addStyleTag({
-      content: '.sign-panel-wrapper, .sign-banner { display: none !important; }',
+      content: `
+        @page { margin: 0.4in 0 0 0; }
+        @page :first { margin-top: 0; }
+        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+        .sign-panel-wrapper, .sign-banner { display: none !important; }
+        .page-wrapper { margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
+      `,
     });
 
     const pdf = await page.pdf({
@@ -51,7 +62,8 @@ module.exports = async function handler(req, res) {
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.status(200).send(pdf);
+    res.setHeader('Content-Length', pdf.length);
+    res.status(200).end(pdf);
   } catch (err) {
     console.error('PDF generation failed:', err);
     res.status(500).send(err.message);
