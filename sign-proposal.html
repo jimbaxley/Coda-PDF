@@ -378,9 +378,9 @@
         <div class="sig-row">
           <div class="sig-block">
             <div class="sig-line">
-              <span class="sig-handwriting" id="lauraSig">{{branding.signatory}}</span>
+              <span class="sig-handwriting" id="lauraSig">{{ourSigner}}</span>
             </div>
-            <div class="sig-name">{{branding.signatory}}</div>
+            <div class="sig-name">{{ourSigner}}</div>
             <div class="sig-company">{{branding.companyName}}</div>
             <div class="sig-date-label">Date</div>
             <div class="sig-date-line">
@@ -417,7 +417,7 @@
           <div class="checkmark">✓</div>
           <h2>Already Signed</h2>
           <p>This proposal was signed by <strong>{{signedBy}}</strong>{{#if signedDate}} on {{signedDate}}{{/if}}.</p>
-          <button onclick="window.print()">Download Signed Copy</button>
+          <button onclick="downloadPdf()">Download Signed Copy</button>
         </div>
         {{else}}
         <div class="sign-panel" id="signPanel">
@@ -437,7 +437,7 @@
           <div class="checkmark">✓</div>
           <h2>Signed!</h2>
           <p>Thank you for signing. Click below to download your copy.</p>
-          <button onclick="window.print()">Download Signed Copy</button>
+          <button onclick="downloadPdf()">Download Signed Copy</button>
         </div>
         {{/if}}
       </div>
@@ -452,10 +452,11 @@
 
     const alreadySigned = '{{signedBy}}' !== '';
     const lauraDateEl = document.getElementById('lauraDate');
-    if (alreadySigned) {
-      lauraDateEl.textContent = '{{signedDate}}';
-    } else {
-      lauraDateEl.textContent = signedAt;
+    const ourSignedDate = '{{ourSignedDate}}';
+    lauraDateEl.textContent = ourSignedDate || signedAt;
+
+    function downloadPdf() {
+      window.location.href = '/api/pdf?proposal=' + encodeURIComponent(proposalNumber);
     }
 
     function updateSignPreview(name) {

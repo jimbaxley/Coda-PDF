@@ -1,0 +1,59 @@
+require('dotenv').config();
+
+const { fetchProposalData, renderHtml } = require('../lib/proposal');
+
+async function launchBrowser() {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const chromium = require('@sparticuz/chromium');
+    const puppeteer = require('puppeteer-core');
+    return puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+  }
+  const puppeteer = require('puppeteer');
+  return puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+}
+
+module.exports = async function handler(req, res) {
+  const proposalNumber = req.query.proposal;
+  if (!proposalNumber) {
+    return res.status(400).send('Missing ?proposal= parameter');
+  }
+
+  try {
+    const templateData = await fetchProposalData(proposalNumber);
+    const html = renderHtml(templateData, 'sign-proposal.html');
+
+    const browser = await launchBrowser();
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    // Hide interactive UI — only the proposal content goes in the PDF
+    await page.addStyleTag({
+      content: '.sign-panel-wrapper, .sign-banner { display: none !important; }',
+    });
+
+    const pdf = await page.pdf({
+      format: 'Letter',
+      printBackground: true,
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
+    });
+
+    await browser.close();
+
+    const proposalName = (templateData.proposalName || proposalNumber)
+      .replace(/[^a-zA-Z0-9-_ ]/g, '')
+      .trim();
+    const filename = `Baxley Consulting | ${proposalName}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(pdf);
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    res.status(500).send(err.message);
+  }
+};

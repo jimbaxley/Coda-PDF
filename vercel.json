@@ -3,6 +3,11 @@
     "api/index.js": {
       "maxDuration": 30,
       "includeFiles": "**/*.html"
+    },
+    "api/pdf.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "**/*.html"
     }
   },
   "rewrites": [
