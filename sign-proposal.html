@@ -449,15 +449,31 @@
   <script>
     const proposalNumber = '{{proposalNumber}}';
     const clientContact = '{{clientContact}}';
-    const signedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    // Same format as server-side formatDateTime — keeps on-screen and PDF timestamps in sync
+    const signedAtISO = new Date().toISOString();
+    const signedAt = new Date().toLocaleString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+      timeZone: 'America/New_York',
+    });
 
     const alreadySigned = '{{signedBy}}' !== '';
     const lauraDateEl = document.getElementById('lauraDate');
     const ourSignedDate = '{{ourSignedDate}}';
     lauraDateEl.textContent = ourSignedDate || signedAt;
 
+    let pdfBlobUrl = null;
+
     function downloadPdf() {
-      window.location.href = '/api/pdf?proposal=' + encodeURIComponent(proposalNumber);
+      if (pdfBlobUrl) {
+        const a = document.createElement('a');
+        a.href = pdfBlobUrl;
+        a.download = document.title.replace('Sign: ', 'Baxley Consulting | ') + '.pdf';
+        a.click();
+      } else {
+        // Fallback for already-signed revisits — Coda will have propagated by now
+        window.location.href = '/api/pdf?proposal=' + encodeURIComponent(proposalNumber);
+      }
     }
 
     function updateSignPreview(name) {
@@ -473,31 +489,45 @@
       btn.disabled = true;
       btn.textContent = 'Signing…';
 
-      // Fill signature block
+      // Fill signature block on screen immediately
       document.getElementById('clientSig').textContent = name;
       document.getElementById('clientDate').textContent = signedAt;
-      document.getElementById('lauraDate').textContent = signedAt;
 
-      // Fire webhook to update Coda
-      try {
-        await fetch('/api/signed', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            proposalNumber,
-            clientName: name,
-            signedAt: new Date().toISOString(),
-          }),
-        });
-      } catch (e) {
-        console.warn('Webhook failed:', e.message);
-        // Don't block the user — signature is still valid
-      }
-
-      // Show confirmation
+      // Show confirmation right away; update download button to loading state
       document.getElementById('signPanel').style.display = 'none';
       document.getElementById('signedConfirmation').style.display = 'block';
-      document.querySelector('.sign-banner').textContent = '✓ Signed — use the button below to download your copy.';
+      document.querySelector('.sign-banner').textContent = '✓ Signed — your PDF is being prepared…';
+      const dlBtn = document.querySelector('#signedConfirmation button');
+      dlBtn.disabled = true;
+      dlBtn.textContent = 'Preparing PDF…';
+
+      // Fire Coda write and PDF generation in parallel — don't wait for Coda before generating PDF
+      const [, pdfRes] = await Promise.allSettled([
+        fetch('/api/signed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proposalNumber, clientName: name, signedAt: signedAtISO }),
+        }),
+        fetch('/api/pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proposalNumber, signedBy: name, signedAt: signedAtISO }),
+        }),
+      ]);
+
+      if (pdfRes.status === 'fulfilled' && pdfRes.value.ok) {
+        const blob = await pdfRes.value.blob();
+        pdfBlobUrl = URL.createObjectURL(blob);
+        dlBtn.disabled = false;
+        dlBtn.textContent = 'Download Signed Copy';
+        document.querySelector('.sign-banner').textContent = '✓ Signed — use the button below to download your copy.';
+      } else {
+        // PDF failed — fall back to GET (Coda may have caught up by now)
+        dlBtn.disabled = false;
+        dlBtn.textContent = 'Download Signed Copy';
+        document.querySelector('.sign-banner').textContent = '✓ Signed — use the button below to download your copy.';
+        console.warn('PDF pre-generation failed, will fetch on demand');
+      }
     }
   </script>
 

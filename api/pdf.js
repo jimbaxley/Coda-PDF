@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { fetchProposalData, renderHtml } = require('../lib/proposal');
+const { fetchProposalData, renderHtml, formatDateTime } = require('../lib/proposal');
 
 // VERCEL_ENV is 'production' or 'preview' in real deployments, 'development' in vercel dev
 const isServerless = (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'development')
@@ -22,13 +22,23 @@ async function launchBrowser() {
 }
 
 module.exports = async function handler(req, res) {
-  const proposalNumber = req.query.proposal;
+  // POST: signed data passed directly (avoids Coda propagation delay)
+  // GET:  re-fetch everything from Coda (for already-signed revisits)
+  const isPost = req.method === 'POST';
+  const proposalNumber = isPost ? req.body?.proposalNumber : req.query.proposal;
+
   if (!proposalNumber) {
-    return res.status(400).send('Missing ?proposal= parameter');
+    return res.status(400).send('Missing proposal number');
   }
 
   try {
     const templateData = await fetchProposalData(proposalNumber);
+
+    if (isPost && req.body) {
+      const { signedBy, signedAt } = req.body;
+      if (signedBy) templateData.signedBy = signedBy;
+      if (signedAt) templateData.signedDate = formatDateTime(signedAt);
+    }
     const html = renderHtml(templateData, 'sign-proposal.html');
 
     const browser = await launchBrowser();
