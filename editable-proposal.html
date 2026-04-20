@@ -81,6 +81,20 @@
 
     .action-bar .btn-sign:hover { background: rgba(91,45,142,0.07); }
 
+    .action-bar .btn-void {
+      background: none;
+      border: 1.5px solid #c0392b;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      color: #c0392b;
+      cursor: pointer;
+    }
+
+    .action-bar .btn-void:hover { background: rgba(192,57,43,0.07); }
+
     /* ===== PAGE WRAPPER ===== */
     .page-wrapper {
       margin: 60px auto 40px;
@@ -248,6 +262,10 @@
     {{/if}}
     <div class="spacer"></div>
 
+    {{#if signedBy}}
+    <button class="btn-void" onclick="voidSignature()">Void Signature</button>
+    {{/if}}
+
     <button class="btn-sign" onclick="copySigningLink()" title="Copy a link to send to your client for signing">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       <span id="signBtnLabel">Copy Link to Sign</span>
@@ -398,6 +416,17 @@
   </div>
 
   <script>
+    async function voidSignature() {
+      if (!confirm('Void this signature? This will clear the signed status so the proposal can be edited and resent.')) return;
+      const proposal = new URLSearchParams(location.search).get('proposal') || '';
+      const res = await fetch('/api/void?proposal=' + encodeURIComponent(proposal), { method: 'POST' });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        alert('Failed to void signature. Please try again.');
+      }
+    }
+
     function copySigningLink() {
       const proposal = new URLSearchParams(location.search).get('proposal') || '';
       const signingUrl = location.origin + '/?proposal=' + encodeURIComponent(proposal) + '&mode=sign';
