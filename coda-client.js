@@ -20,7 +20,7 @@ class CodaClient {
       params.append('query', `"${col}":${JSON.stringify(val)}`);
     }
     const url = `${BASE_URL}/docs/${this.docId}/tables/${tableId}/rows?${params}`;
-    const signal = AbortSignal.timeout(20000);
+    const signal = AbortSignal.timeout(45000);
     const res = await fetch(url, { headers: this.headers, signal });
     if (!res.ok) {
       throw new Error(`Coda API error ${res.status}: ${await res.text()}`);
