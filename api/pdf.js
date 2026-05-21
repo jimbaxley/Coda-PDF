@@ -57,12 +57,20 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const templateData = await fetchProposalData(proposalNumber);
-
-    if (isPost && req.body) {
+    let templateData;
+    if (isPost && req.body?.templateData) {
+      // Client embedded the full data at render time — no Coda round-trip needed
+      templateData = req.body.templateData;
       const { signedBy, signedAt } = req.body;
       if (signedBy) templateData.signedBy = signedBy;
       if (signedAt) templateData.signedDate = formatDateTime(signedAt);
+    } else {
+      templateData = await fetchProposalData(proposalNumber);
+      if (isPost && req.body) {
+        const { signedBy, signedAt } = req.body;
+        if (signedBy) templateData.signedBy = signedBy;
+        if (signedAt) templateData.signedDate = formatDateTime(signedAt);
+      }
     }
 
     const html = renderHtml(templateData, 'sign-proposal.html');

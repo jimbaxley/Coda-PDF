@@ -458,6 +458,7 @@
   <script>
     const proposalNumber = '{{proposalNumber}}';
     const clientContact = '{{clientContact}}';
+    const templateData = {{{json templateData}}};
     // Same format as server-side formatDateTime — keeps on-screen and PDF timestamps in sync
     const signedAtISO = new Date().toISOString();
     const signedAt = new Date().toLocaleString('en-US', {
@@ -520,7 +521,7 @@
         fetch('/api/pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ proposalNumber, signedBy: name, signedAt: signedAtISO }),
+          body: JSON.stringify({ proposalNumber, signedBy: name, signedAt: signedAtISO, templateData }),
         }),
       ]);
 
