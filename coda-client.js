@@ -1,4 +1,5 @@
 const BASE_URL = 'https://coda.io/apis/v1';
+const DEFAULT_TIMEOUT_MS = Number(process.env.CODA_FETCH_TIMEOUT_MS || 30000);
 
 class CodaClient {
   constructor(apiToken, docId) {
@@ -20,7 +21,7 @@ class CodaClient {
       params.append('query', `"${col}":${JSON.stringify(val)}`);
     }
     const url = `${BASE_URL}/docs/${this.docId}/tables/${tableId}/rows?${params}`;
-    const signal = AbortSignal.timeout(45000);
+    const signal = AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
     const res = await fetch(url, { headers: this.headers, signal });
     if (!res.ok) {
       throw new Error(`Coda API error ${res.status}: ${await res.text()}`);

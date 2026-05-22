@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const { put } = require('@vercel/blob');
+const { waitUntil } = require('@vercel/functions');
 const { fetchProposalData, renderHtml, formatDateTime } = require('../lib/proposal');
 const { makeDownloadUrl } = require('../lib/token');
 const CodaClient = require('../coda-client');
@@ -46,6 +47,41 @@ async function sendLoopsEmail(email, dataVariables) {
   }
 }
 
+async function settlePostSignTasks({ proposalNumber, pdf, templateData, proposalName }) {
+  // 1. Upload private blob
+  const blob = await put(`pdfs/${proposalNumber}.pdf`, pdf, {
+    access: 'private',
+    contentType: 'application/pdf',
+    allowOverwrite: true,
+  });
+
+  // 2. Build signed download URL
+  const downloadUrl = makeDownloadUrl(proposalNumber);
+
+  const emailVars = {
+    signedBy: templateData.signedBy,
+    docName: proposalName,
+    signedDate: templateData.signedDate,
+    docLink: downloadUrl,
+  };
+
+  // 3. Send emails + write URL to Coda in parallel
+  await Promise.allSettled([
+    templateData.clientEmail
+      ? sendLoopsEmail(templateData.clientEmail, emailVars)
+      : Promise.resolve(),
+    sendLoopsEmail('jim@thebaxleys.org', emailVars),
+    (async () => {
+      const coda = new CodaClient(process.env.CODA_API_TOKEN, process.env.CODA_DOC_ID || 'C-uztK2tfM');
+      const row = await coda.getRow(PROPOSALS_TABLE, { 'Proposal Number': proposalNumber });
+      await coda.updateRow(PROPOSALS_TABLE, row.id, {
+        'PDF Link': blob.url,
+        'PDF Download URL': downloadUrl,
+      });
+    })(),
+  ]);
+}
+
 module.exports = async function handler(req, res) {
   // POST: signed data passed directly (avoids Coda propagation delay)
   // GET:  re-fetch everything from Coda (for already-signed revisits)
@@ -75,83 +111,64 @@ module.exports = async function handler(req, res) {
 
     const html = renderHtml(templateData, 'sign-proposal.html');
 
-    const browser = await launchBrowser();
-    const page = await browser.newPage();
-    // 816px = 8.5in at 96dpi — matches Letter width so page-wrapper fills edge to edge
-    await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 1 });
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    let browser;
+    let pdf;
+    try {
+      browser = await launchBrowser();
+      const page = await browser.newPage();
+      // 816px = 8.5in at 96dpi — matches Letter width so page-wrapper fills edge to edge
+      await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 1 });
+      await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.evaluate(async () => {
+        if (!document.fonts) return;
+        await Promise.race([
+          document.fonts.ready,
+          new Promise((resolve) => setTimeout(resolve, 3000)),
+        ]);
+      });
+      await page.evaluate(async () => {
+        const images = Array.from(document.images).filter((img) => !img.complete);
+        await Promise.race([
+          Promise.allSettled(images.map((img) => img.decode())),
+          new Promise((resolve) => setTimeout(resolve, 5000)),
+        ]);
+      });
 
-    await page.addStyleTag({
-      content: `
-        @page { margin: 0.4in 0 0 0; }
-        @page :first { margin-top: 0; }
-        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-        .sign-panel-wrapper, .sign-banner { display: none !important; }
-        .page-wrapper { margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
-      `,
-    });
+      await page.addStyleTag({
+        content: `
+          @page { margin: 0.4in 0 0 0; }
+          @page :first { margin-top: 0; }
+          html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+          .sign-panel-wrapper, .sign-banner, .processing-overlay { display: none !important; }
+          .page-wrapper { margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
+        `,
+      });
 
-    const pdf = await page.pdf({
-      format: 'Letter',
-      printBackground: true,
-      margin: { top: 0, bottom: 0, left: 0, right: 0 },
-    });
-
-    await browser.close();
+      pdf = await page.pdf({
+        format: 'Letter',
+        printBackground: true,
+        margin: { top: 0, bottom: 0, left: 0, right: 0 },
+      });
+    } finally {
+      if (browser) await browser.close();
+    }
 
     const proposalName = (templateData.proposalName || proposalNumber)
       .replace(/[^a-zA-Z0-9-_ ]/g, '')
       .trim();
     const filename = `Baxley Consulting | ${proposalName}.pdf`;
 
-    // On POST (fresh signing): upload to blob, send emails, write URL back to Coda
-    if (isPost) {
-      try {
-        // 1. Upload private blob
-        const blob = await put(`pdfs/${proposalNumber}.pdf`, pdf, {
-          access: 'private',
-          contentType: 'application/pdf',
-          allowOverwrite: true,
-        });
-
-        // 2. Build signed download URL
-        const downloadUrl = makeDownloadUrl(proposalNumber);
-
-        const emailVars = {
-          signedBy: templateData.signedBy,
-          docName: proposalName,
-          signedDate: templateData.signedDate,
-          docLink: downloadUrl,
-        };
-
-        // 3. Send emails + write URL to Coda in parallel
-        await Promise.allSettled([
-          // Email client
-          templateData.clientEmail
-            ? sendLoopsEmail(templateData.clientEmail, emailVars)
-            : Promise.resolve(),
-          // Email Jim
-          sendLoopsEmail('jim@thebaxleys.org', emailVars),
-          // Write blob URL + download URL to Coda row
-          (async () => {
-            const coda = new CodaClient(process.env.CODA_API_TOKEN, process.env.CODA_DOC_ID || 'C-uztK2tfM');
-            const row = await coda.getRow(PROPOSALS_TABLE, { 'Proposal Number': proposalNumber });
-            await coda.updateRow(PROPOSALS_TABLE, row.id, {
-              'PDF Link': blob.url,
-              'PDF Download URL': downloadUrl,
-            });
-          })(),
-        ]);
-      } catch (err) {
-        // Non-fatal — PDF still returns to client
-        console.error('Post-sign tasks failed:', err);
-      }
-    }
-
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', pdf.length);
     res.status(200).end(pdf);
+
+    if (isPost) {
+      waitUntil(
+        settlePostSignTasks({ proposalNumber, pdf, templateData, proposalName })
+          .catch((err) => console.error('Post-sign tasks failed:', err))
+      );
+    }
   } catch (err) {
     console.error('PDF generation failed:', err);
     res.status(500).send(err.message);
