@@ -101,11 +101,19 @@ function renderSignLoadingShell(proposalNumber) {
       setTimeout(() => markStep(2), 2400),
     ];
 
-    fetch('${fetchUrl}', { headers: { Accept: 'text/html' }, cache: 'no-store' })
-      .then(async (response) => {
+    const fetchRenderedProposal = async (attempt = 1) => {
+      try {
+        const response = await fetch('${fetchUrl}', { headers: { Accept: 'text/html' }, cache: 'no-store' });
         if (!response.ok) throw new Error(await response.text());
-        return response.text();
-      })
+        return await response.text();
+      } catch (err) {
+        if (attempt >= 2) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        return fetchRenderedProposal(attempt + 1);
+      }
+    };
+
+    fetchRenderedProposal()
       .then((html) => {
         timers.forEach(clearTimeout);
         document.open();
