@@ -17,7 +17,7 @@ Coda button → sign.baxleyconsulting.com/?proposal=P-XXXXXX-XX
       • Puppeteer generates signed PDF
       • PDF uploaded to private Vercel Blob
       • HMAC-signed download link generated
-      • Loops.so email sent to client + Jim
+      • Loops.so email sent to client + Jim + Laura
       • Coda row updated (PDF Link, PDF Download URL)
   → Client gets "Download Signed Copy" immediately from browser blob
   → Email link hits /api/download → validates token → proxies private PDF

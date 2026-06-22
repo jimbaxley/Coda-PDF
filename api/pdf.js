@@ -8,6 +8,10 @@ const CodaClient = require('../coda-client');
 
 const PROPOSALS_TABLE = 'grid-LW06aE88FS';
 const LOOPS_TRANSACTIONAL_ID = 'cmnrez4my0fah0i035lpv2gkn';
+const INTERNAL_SIGNED_EMAIL_RECIPIENTS = [
+  'jim@thebaxleys.org',
+  'laura@baxleyconsulting.com',
+];
 
 // VERCEL_ENV is 'production' or 'preview' in real deployments, 'development' in vercel dev
 const isServerless = (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'development')
@@ -70,7 +74,7 @@ async function settlePostSignTasks({ proposalNumber, pdf, templateData, proposal
     templateData.clientEmail
       ? sendLoopsEmail(templateData.clientEmail, emailVars)
       : Promise.resolve(),
-    sendLoopsEmail('jim@thebaxleys.org', emailVars),
+    ...INTERNAL_SIGNED_EMAIL_RECIPIENTS.map((email) => sendLoopsEmail(email, emailVars)),
     (async () => {
       const coda = new CodaClient(process.env.CODA_API_TOKEN, process.env.CODA_DOC_ID || 'C-uztK2tfM');
       const row = await coda.getRow(PROPOSALS_TABLE, { 'Proposal Number': proposalNumber });
