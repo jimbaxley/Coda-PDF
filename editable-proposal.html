@@ -198,12 +198,12 @@
     .line-items tbody td strong { font-weight: 600; }
     .line-items tbody td.cost-col { text-align: right; }
 
-    /* ===== BILLING SUMMARY ===== */
-    .billing-summary { margin: 0.75em 0 0.5em auto; width: min(100%, 22em); border: 1px solid var(--gray-border); border-radius: 5px; overflow: hidden; page-break-inside: avoid; }
-    .billing-row { display: flex; align-items: baseline; justify-content: space-between; gap: 2em; padding: 0.65em 0.85em; background: #fff; }
-    .billing-row + .billing-row { border-top: 1px solid var(--gray-border); }
-    .billing-row .label { color: var(--text-muted); font-size: 9pt; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
-    .billing-row .amount { color: var(--text-dark); font-size: 13pt; font-weight: 700; white-space: nowrap; }
+    /* ===== BILLING GROUPS ===== */
+    .billing-group { margin: 1em 0 1.5em; page-break-inside: avoid; }
+    .billing-group-title { margin: 0 0 0.35em; color: var(--purple); font-size: 10pt; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .group-total { display: flex; align-items: baseline; justify-content: flex-end; gap: 1em; margin-top: 0.55em; color: var(--text-dark); }
+    .group-total .label { font-size: 10pt; font-weight: 600; }
+    .group-total .amount { min-width: 6.5em; text-align: right; font-size: 13pt; font-weight: 700; white-space: nowrap; }
 
     .total-notes { font-size: 9pt; color: var(--text-muted); margin-bottom: 1.5em; }
 
@@ -324,6 +324,9 @@
 
       {{#if lineItems.length}}
       <h2 class="section-heading">What we will deliver</h2>
+      {{#if oneTimeLineItems.length}}
+      <section class="billing-group">
+        <h3 class="billing-group-title">One-time</h3>
       <table class="line-items">
         <thead>
           <tr>
@@ -333,7 +336,7 @@
           </tr>
         </thead>
         <tbody>
-          {{#each lineItems}}
+          {{#each oneTimeLineItems}}
           <tr>
             <td>{{service}}</td>
             <td>{{{details}}}</td>
@@ -342,17 +345,64 @@
           {{/each}}
         </tbody>
       </table>
+      <div class="group-total">
+        <span class="label">One-time total</span>
+        <span class="amount">{{oneTimeTotal}}</span>
+      </div>
+      </section>
+      {{/if}}
 
-      <div class="billing-summary" aria-label="Billing totals">
-        <div class="billing-row">
-          <span class="label">One-time</span>
-          <span class="amount">{{oneTimeTotal}}</span>
-        </div>
-        <div class="billing-row">
-          <span class="label">Monthly</span>
+      {{#if monthlyLineItems.length}}
+      <section class="billing-group">
+        <h3 class="billing-group-title">Monthly</h3>
+        <table class="line-items">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Details</th>
+              <th class="cost-col">Est. Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each monthlyLineItems}}
+            <tr>
+              <td>{{service}}</td>
+              <td>{{{details}}}</td>
+              <td class="cost-col">{{estCost}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        <div class="group-total">
+          <span class="label">Monthly total</span>
           <span class="amount">{{monthlyTotal}}</span>
         </div>
-      </div>
+      </section>
+      {{/if}}
+
+      {{#if unclassifiedLineItems.length}}
+      <section class="billing-group">
+        <h3 class="billing-group-title">Billing schedule not specified</h3>
+        <table class="line-items">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Details</th>
+              <th class="cost-col">Est. Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each unclassifiedLineItems}}
+            <tr>
+              <td>{{service}}</td>
+              <td>{{{details}}}</td>
+              <td class="cost-col">{{estCost}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </section>
+      {{/if}}
 
       {{#if specialTerms}}
       <div class="total-notes">{{{specialTerms}}}</div>
