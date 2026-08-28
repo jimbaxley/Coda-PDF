@@ -255,24 +255,12 @@
       font-style: italic;
     }
 
-    /* ===== PROPOSAL TOTAL ===== */
-    .proposal-total {
-      text-align: right;
-      font-size: 12pt;
-      margin: 0.75em 0 1em;
-      padding-top: 0.5em;
-      border-top: 2px solid var(--text-dark);
-    }
-
-    .proposal-total .label {
-      font-weight: 600;
-    }
-
-    .proposal-total .amount {
-      font-weight: 700;
-      font-size: 14pt;
-      margin-left: 0.5em;
-    }
+    /* ===== BILLING SUMMARY ===== */
+    .billing-summary { margin: 0.75em 0 1em auto; width: 22em; max-width: 100%; border: 1px solid var(--gray-border); border-radius: 5px; overflow: hidden; page-break-inside: avoid; }
+    .billing-row { display: flex; align-items: baseline; justify-content: space-between; gap: 2em; padding: 0.65em 0.85em; background: #fff; }
+    .billing-row + .billing-row { border-top: 1px solid var(--gray-border); }
+    .billing-row .label { color: var(--text-muted); font-size: 9pt; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+    .billing-row .amount { color: var(--text-dark); font-size: 13pt; font-weight: 700; white-space: nowrap; }
 
     /* ===== FOOTNOTE ===== */
     .footnote {
@@ -479,9 +467,15 @@
       </tbody>
     </table>
 
-    <div class="proposal-total">
-      <span class="label">{{totalLabel}}</span>
-      <span class="amount">{{total}}</span>
+    <div class="billing-summary" aria-label="Billing totals">
+      <div class="billing-row">
+        <span class="label">One-time</span>
+        <span class="amount">{{oneTimeTotal}}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Monthly</span>
+        <span class="amount">{{monthlyTotal}}</span>
+      </div>
     </div>
 
     {{#if totalNotes}}
